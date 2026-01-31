@@ -325,10 +325,8 @@ void TicTacToe::updateAI()
         int randomIndex = rand() % emptySquares.size();
         BitHolder* targetSquare = emptySquares[randomIndex];
         
-        // Create AI piece and place it
-        Bit* aiBit = PieceForPlayer(AI_PLAYER);
-        aiBit->setPosition(targetSquare->getPosition().x, targetSquare->getPosition().y);
-        targetSquare->setBit(aiBit);
+        // Use actionForEmptyHolder to place the piece
+        actionForEmptyHolder(targetSquare);
         
         // End the AI's turn
         endTurn();
