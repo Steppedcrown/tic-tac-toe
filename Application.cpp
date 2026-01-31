@@ -20,6 +20,9 @@ namespace ClassGame {
         {
             game = new TicTacToe();
             game->setUpBoard();
+            gameOver = false;
+            gameWinner = -1;
+            EndOfTurn();
         }
 
         //
@@ -94,5 +97,8 @@ namespace ClassGame {
             if (!game || state == nullptr)
                 return;
             game->setStateString(std::string(state));
+            gameOver = false;
+            gameWinner = -1;
+            EndOfTurn();
         }
 }
