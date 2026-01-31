@@ -1,3 +1,14 @@
+// -----------------------------------------------------------------------------
+// TicTacToe class implementation
+// -----------------------------------------------------------------------------
+// This implementation uses a 3x3 BitHolder grid, places Bits for each player,
+// checks win/draw conditions, and serializes the board to/from a compact
+// 9-character state string. Related changes include ImGui .ini load/save hooks
+// for the state string and re-checking game-over state after loading.
+//
+// Note: Portions of this project were completed with generative AI assistance.
+// -----------------------------------------------------------------------------
+
 #include "TicTacToe.h"
 
 // -----------------------------------------------------------------------------
