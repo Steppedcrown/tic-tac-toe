@@ -1,15 +1,21 @@
 // -----------------------------------------------------------------------------
-// TicTacToe class implementation
-// -----------------------------------------------------------------------------
+// TicTacToe class implementation:
 // This implementation uses a 3x3 BitHolder grid, places Bits for each player,
 // checks win/draw conditions, and serializes the board to/from a compact
 // 9-character state string. Related changes include ImGui .ini load/save hooks
 // for the state string and re-checking game-over state after loading.
 //
+// AI Implementation:
+// - Player 1 (O) is controlled by a basic random AI.
+// - The AI finds all empty squares and randomly selects one to place its piece.
+// - Uses actionForEmptyHolder() to maintain consistent piece placement logic.
+//
 // Note: Portions of this project were completed with generative AI assistance.
 // -----------------------------------------------------------------------------
 
 #include "TicTacToe.h"
+#include <vector>
+#include <cstdlib>
 
 // -----------------------------------------------------------------------------
 // TicTacToe.cpp
@@ -70,6 +76,7 @@ void TicTacToe::setUpBoard()
     // we will use the initHolder function on each square to do this
     // finally we should call startGame to get everything going
     setNumberOfPlayers(2);
+    setAIPlayer(AI_PLAYER);
 
     _gameOptions.rowX = 3;
     _gameOptions.rowY = 3;
@@ -307,6 +314,26 @@ void TicTacToe::setStateString(const std::string &s)
 //
 void TicTacToe::updateAI() 
 {
-    // we will implement the AI in the next assignment!
+    // Find all empty squares
+    std::vector<BitHolder*> emptySquares;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (_grid[i][j].bit() == nullptr) {
+                emptySquares.push_back(&_grid[i][j]);
+            }
+        }
+    }
+    
+    // If there are empty squares, pick a random one and place the AI's piece
+    if (!emptySquares.empty()) {
+        int randomIndex = rand() % emptySquares.size();
+        BitHolder* targetSquare = emptySquares[randomIndex];
+        
+        // Use actionForEmptyHolder to place the piece
+        actionForEmptyHolder(targetSquare);
+        
+        // End the AI's turn
+        endTurn();
+    }
 }
 
