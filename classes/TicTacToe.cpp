@@ -10,6 +10,8 @@
 // -----------------------------------------------------------------------------
 
 #include "TicTacToe.h"
+#include <vector>
+#include <cstdlib>
 
 // -----------------------------------------------------------------------------
 // TicTacToe.cpp
@@ -70,6 +72,7 @@ void TicTacToe::setUpBoard()
     // we will use the initHolder function on each square to do this
     // finally we should call startGame to get everything going
     setNumberOfPlayers(2);
+    setAIPlayer(AI_PLAYER);
 
     _gameOptions.rowX = 3;
     _gameOptions.rowY = 3;
@@ -307,6 +310,28 @@ void TicTacToe::setStateString(const std::string &s)
 //
 void TicTacToe::updateAI() 
 {
-    // we will implement the AI in the next assignment!
+    // Find all empty squares
+    std::vector<BitHolder*> emptySquares;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (_grid[i][j].bit() == nullptr) {
+                emptySquares.push_back(&_grid[i][j]);
+            }
+        }
+    }
+    
+    // If there are empty squares, pick a random one and place the AI's piece
+    if (!emptySquares.empty()) {
+        int randomIndex = rand() % emptySquares.size();
+        BitHolder* targetSquare = emptySquares[randomIndex];
+        
+        // Create AI piece and place it
+        Bit* aiBit = PieceForPlayer(AI_PLAYER);
+        aiBit->setPosition(targetSquare->getPosition().x, targetSquare->getPosition().y);
+        targetSquare->setBit(aiBit);
+        
+        // End the AI's turn
+        endTurn();
+    }
 }
 
