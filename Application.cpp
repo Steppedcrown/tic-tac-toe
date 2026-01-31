@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "imgui/imgui.h"
 #include "classes/TicTacToe.h"
+#include <string>
 
 namespace ClassGame {
         //
@@ -9,6 +10,8 @@ namespace ClassGame {
         TicTacToe *game = nullptr;
         bool gameOver = false;
         int gameWinner = -1;
+        // Cached state string for ImGui save callback lifetime.
+        static std::string g_cachedState;
 
         //
         // game starting point
@@ -18,6 +21,10 @@ namespace ClassGame {
         {
             game = new TicTacToe();
             game->setUpBoard();
+            // Ensure game-over UI is correct for a freshly initialized/loaded state.
+            gameOver = false;
+            gameWinner = -1;
+            EndOfTurn();
         }
 
         //
@@ -39,7 +46,11 @@ namespace ClassGame {
 
                 if (gameOver) {
                     ImGui::Text("Game Over!");
-                    ImGui::Text("Winner: %d", gameWinner);
+                    if (gameWinner == -1) {
+                        ImGui::Text("It's a Draw!");
+                    } else {
+                        ImGui::Text("Player %d wins!", gameWinner);
+                    }
                     if (ImGui::Button("Reset Game")) {
                         game->stopGame();
                         game->setUpBoard();
@@ -70,5 +81,29 @@ namespace ClassGame {
                 gameOver = true;
                 gameWinner = -1;
             }
+        }
+
+        const char* GetStateString()
+        {
+            // Used by ImGui .ini save handler.
+            if (!game)
+            {
+                g_cachedState.clear();
+                return g_cachedState.c_str();
+            }
+            g_cachedState = game->stateString();
+            return g_cachedState.c_str();
+        }
+
+        void SetStateString(const char* state)
+        {
+            // Used by ImGui .ini load handler.
+            if (!game || state == nullptr)
+                return;
+            game->setStateString(std::string(state));
+            // Re-evaluate game-over state after loading.
+            gameOver = false;
+            gameWinner = -1;
+            EndOfTurn();
         }
 }
