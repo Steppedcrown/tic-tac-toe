@@ -235,7 +235,18 @@ std::string TicTacToe::stateString() const
     // remember that player numbers are zero-based, so add 1 to get '1' or '2'
     // if the bit is null, add '0' to the string
     // finally, return the constructed string
-    return "000000000";
+    std::string state;
+    for (int i = 0; i < 9; i++) {
+        int y = i / 3;
+        int x = i % 3;
+        Bit* bit = _grid[y][x].bit();
+        if (bit) {
+            state += std::to_string(bit->getOwner()->playerNumber() + 1);
+        } else {
+            state += "0";
+        }
+    }
+    return state;
 }
 
 //
@@ -264,6 +275,19 @@ void TicTacToe::setStateString(const std::string &s)
     // loop through the 3x3 array and set each square accordingly
     // the string should always be valid, so you don't need to check its length or contents
     // but you can assume it will always be 9 characters long and only contain '0', '1', or '2'
+    for (int i = 0; i < 9; i++) {
+        int y = i / 3;
+        int x = i % 3;
+        char c = s[i];
+        if (c == '0') {
+            _grid[y][x].destroyBit();
+        } else {
+            int playerNumber = c - '0' - 1; // convert '1'/'2' to 0/1
+            Bit* newBit = PieceForPlayer(playerNumber);
+            newBit->setPosition(_grid[y][x].getPosition().x, _grid[y][x].getPosition().y);
+            _grid[y][x].setBit(newBit);
+        }
+    }
 }
 
 
