@@ -10,6 +10,7 @@ namespace ClassGame {
         TicTacToe *game = nullptr;
         bool gameOver = false;
         int gameWinner = -1;
+        // Cached state string for ImGui save callback lifetime.
         static std::string g_cachedState;
 
         //
@@ -20,6 +21,7 @@ namespace ClassGame {
         {
             game = new TicTacToe();
             game->setUpBoard();
+            // Ensure game-over UI is correct for a freshly initialized/loaded state.
             gameOver = false;
             gameWinner = -1;
             EndOfTurn();
@@ -83,6 +85,7 @@ namespace ClassGame {
 
         const char* GetStateString()
         {
+            // Used by ImGui .ini save handler.
             if (!game)
             {
                 g_cachedState.clear();
@@ -94,9 +97,11 @@ namespace ClassGame {
 
         void SetStateString(const char* state)
         {
+            // Used by ImGui .ini load handler.
             if (!game || state == nullptr)
                 return;
             game->setStateString(std::string(state));
+            // Re-evaluate game-over state after loading.
             gameOver = false;
             gameWinner = -1;
             EndOfTurn();

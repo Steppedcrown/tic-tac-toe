@@ -1280,7 +1280,7 @@ static void             WindowSettingsHandler_ReadLine(ImGuiContext*, ImGuiSetti
 static void             WindowSettingsHandler_ApplyAll(ImGuiContext*, ImGuiSettingsHandler*);
 static void             WindowSettingsHandler_WriteAll(ImGuiContext*, ImGuiSettingsHandler*, ImGuiTextBuffer* buf);
 
-// App-specific settings (TicTacToe)
+// App-specific settings (TicTacToe) for saving/loading game state in imgui.ini
 namespace ClassGame { const char* GetStateString(); void SetStateString(const char* state); }
 static void             GameSettingsHandler_ClearAll(ImGuiContext*, ImGuiSettingsHandler*);
 static void*            GameSettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*, const char* name);
@@ -16188,18 +16188,22 @@ static void WindowSettingsHandler_WriteAll(ImGuiContext* ctx, ImGuiSettingsHandl
 // [SECTION] APP SETTINGS (TicTacToe)
 //-----------------------------------------------------------------------------
 
+// Minimal storage for a 9-char board state plus null terminator.
 struct ImGuiGameSettings
 {
     char State[16];
 };
 
+// Cached settings data parsed from imgui.ini.
 static ImGuiGameSettings GGameSettings = {{0}};
 
+// Clear any previously loaded state.
 static void GameSettingsHandler_ClearAll(ImGuiContext*, ImGuiSettingsHandler*)
 {
     GGameSettings.State[0] = '\0';
 }
 
+// Open the [TicTacToe][Game] section and return storage for its lines.
 static void* GameSettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*, const char* name)
 {
     if (name == NULL)
@@ -16207,6 +16211,7 @@ static void* GameSettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*, 
     return (strcmp(name, "Game") == 0) ? &GGameSettings : NULL;
 }
 
+// Parse individual lines within the section.
 static void GameSettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler*, void* entry, const char* line)
 {
     ImGuiGameSettings* settings = (ImGuiGameSettings*)entry;
@@ -16214,12 +16219,14 @@ static void GameSettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler*, v
         ImStrncpy(settings->State, line + 6, IM_ARRAYSIZE(settings->State));
 }
 
+// Apply loaded state to the game after parsing is complete.
 static void GameSettingsHandler_ApplyAll(ImGuiContext*, ImGuiSettingsHandler*)
 {
     if (GGameSettings.State[0] != '\0')
         ClassGame::SetStateString(GGameSettings.State);
 }
 
+// Write current state into imgui.ini.
 static void GameSettingsHandler_WriteAll(ImGuiContext*, ImGuiSettingsHandler*, ImGuiTextBuffer* buf)
 {
     const char* state = ClassGame::GetStateString();
