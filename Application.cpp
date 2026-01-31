@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "imgui/imgui.h"
 #include "classes/TicTacToe.h"
+#include <string>
 
 namespace ClassGame {
         //
@@ -9,6 +10,7 @@ namespace ClassGame {
         TicTacToe *game = nullptr;
         bool gameOver = false;
         int gameWinner = -1;
+        static std::string g_cachedState;
 
         //
         // game starting point
@@ -74,5 +76,23 @@ namespace ClassGame {
                 gameOver = true;
                 gameWinner = -1;
             }
+        }
+
+        const char* GetStateString()
+        {
+            if (!game)
+            {
+                g_cachedState.clear();
+                return g_cachedState.c_str();
+            }
+            g_cachedState = game->stateString();
+            return g_cachedState.c_str();
+        }
+
+        void SetStateString(const char* state)
+        {
+            if (!game || state == nullptr)
+                return;
+            game->setStateString(std::string(state));
         }
 }
