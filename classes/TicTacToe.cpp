@@ -122,6 +122,13 @@ void TicTacToe::stopGame()
 {
     // clear out the board
     // loop through the 3x3 array and call destroyBit on each square
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            _grid[i][j].destroyBit();
+        }
+    }
 }
 
 //
@@ -134,6 +141,12 @@ Player* TicTacToe::ownerAt(int index ) const
     // x = index % 3 
     // if there is no bit at that location (in _grid) return nullptr
     // otherwise return the owner of the bit at that location using getOwner()
+    int y = index / 3;
+    int x = index % 3;
+    Bit* bit = _grid[y][x].bit();
+    if (bit) {
+        return bit->getOwner();
+    }
     return nullptr;
 }
 
@@ -158,6 +171,27 @@ Player* TicTacToe::checkForWinner()
 
     // Hint: Consider using an array to store the winning combinations
     // to avoid repetitive code
+    int winningCombos[8][3] = {
+        {0, 1, 2},
+        {3, 4, 5},
+        {6, 7, 8},
+        {0, 3, 6},
+        {1, 4, 7},
+        {2, 5, 8},
+        {0, 4, 8},
+        {2, 4, 6}
+    };
+    for (int i = 0; i < 8; i++) {
+        int a = winningCombos[i][0];
+        int b = winningCombos[i][1];
+        int c = winningCombos[i][2];
+        Player* ownerA = ownerAt(a);
+        Player* ownerB = ownerAt(b);
+        Player* ownerC = ownerAt(c);
+        if (ownerA && ownerA == ownerB && ownerB == ownerC) {
+            return ownerA;
+        }
+    }
     return nullptr;
 }
 
@@ -166,7 +200,12 @@ bool TicTacToe::checkForDraw()
     // is the board full with no winner?
     // if any square is empty, return false
     // otherwise return true
-    return false;
+    for (int i = 0; i < 9; i++) {
+        if (ownerAt(i) == nullptr) {
+            return false;
+        }
+    }
+    return true;
 }
 
 //
