@@ -369,7 +369,7 @@ int TicTacToe::negamax(Square board[3][3], int depth, int alpha, int beta, int c
     }
     
     int currentPlayer = (color == 1) ? AI_PLAYER : HUMAN_PLAYER;
-    int bestValue = -BIG_NUMBER;
+    int bestScore = -BIG_NUMBER;
     
     for (int y = 0; y < 3; y++) {
         for (int x = 0; x < 3; x++) {
@@ -385,13 +385,13 @@ int TicTacToe::negamax(Square board[3][3], int depth, int alpha, int beta, int c
                 // Undo the move
                 board[y][x].destroyBit();
                 
-                if (score > bestValue) {
-                    bestValue = score;
+                if (score > bestScore) {
+                    bestScore = score;
                 }
 
                 // Update Alpha
-                if (bestValue > alpha) {
-                    alpha = bestValue;
+                if (bestScore > alpha) {
+                    alpha = bestScore;
                 }
 
                 // Alpha-Beta Cutoff
@@ -401,5 +401,5 @@ int TicTacToe::negamax(Square board[3][3], int depth, int alpha, int beta, int c
             }
         }
     }
-    return bestValue;
+    return bestScore;
 }
