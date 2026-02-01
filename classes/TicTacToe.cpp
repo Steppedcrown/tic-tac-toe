@@ -352,12 +352,9 @@ void TicTacToe::updateAI()
     }
 }
 
-// In your updateAI() call:
-// int score = -negamax(_grid, MAX_DEPTH - 1, -10000, 10000, -1);
-
 int TicTacToe::negamax(Square board[3][3], int depth, int alpha, int beta, int color) 
 {
-    // 1. Terminal State Check
+    // Terminal State Check
     Player *winner = checkForWinner();
     if (winner != nullptr) {
         int score = (winner == getPlayerAt(AI_PLAYER)) ? (10 + depth) : (-10 - depth);
@@ -378,8 +375,7 @@ int TicTacToe::negamax(Square board[3][3], int depth, int alpha, int beta, int c
                 Bit* tempBit = PieceForPlayer(currentPlayer);
                 board[y][x].setBit(tempBit);
                 
-                // Note: The parameters swap and negate for the opponent
-                // -beta becomes the new alpha, -alpha becomes the new beta
+                // Recursive negamax call
                 int score = -negamax(board, depth - 1, -beta, -alpha, -color);
                 
                 // Undo the move
