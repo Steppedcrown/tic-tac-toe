@@ -313,9 +313,9 @@ void TicTacToe::setStateString(const std::string &s)
 //
 // this is the function that will be called by the AI
 //
-void TicTacToe::updateAI() 
+void TicTacToe::updateAI()
 {
-    int bestScore = -INFINITY;
+    int bestScore = -1000;
     int moveX = -1;
     int moveY = -1;
     
@@ -328,7 +328,7 @@ void TicTacToe::updateAI()
                 _grid[y][x].setBit(tempBit);
                 
                 // Evaluate this move (next turn is opponent, so color = -1)
-                int score = -negamax(_grid, MAX_DEPTH - 1, -1);
+                int score = negamax(_grid, MAX_DEPTH - 1, -1);
                 
                 // Undo the move
                 _grid[y][x].destroyBit();
@@ -358,12 +358,12 @@ int TicTacToe::negamax(Square board[3][3], int depth, int color)
     if (winner != nullptr) {
         // If AI won, return positive; if human won, return negative
         if (winner == getPlayerAt(AI_PLAYER)) {
-            return 10 - (MAX_DEPTH - depth);  // Prefer faster wins
+            return 1;
         } else {
-            return -10 + (MAX_DEPTH - depth); // Prefer slower losses
+            return -1;
         }
     }
-    
+
     if (checkForDraw() || depth == 0) {
         return 0; // Draw or max depth reached
     }
@@ -371,7 +371,7 @@ int TicTacToe::negamax(Square board[3][3], int depth, int color)
     // Determine which player is making this move
     // color = 1 means AI's turn, anything else means human's turn
     int currentPlayer = (color == 1) ? AI_PLAYER : HUMAN_PLAYER;
-    int bestValue = -INFINITY;
+    int bestValue = -1000;
     
     for (int y = 0; y < 3; y++) {
         for (int x = 0; x < 3; x++) {
@@ -394,7 +394,7 @@ int TicTacToe::negamax(Square board[3][3], int depth, int color)
     }
     
     // If no moves were possible (shouldn't happen due to terminal checks)
-    if (bestValue == -INFINITY) {
+    if (bestValue == -1000) {
         return 0;
     }
     return bestValue;
