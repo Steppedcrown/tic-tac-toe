@@ -357,12 +357,9 @@ int TicTacToe::negamax(Square board[3][3], int depth, int color)
     // Check for terminal states
     Player *winner = checkForWinner();
     if (winner != nullptr) {
-        // If AI won, return positive; if human won, return negative
-        if (winner == getPlayerAt(AI_PLAYER)) {
-            return 1;
-        } else {
-            return -1;
-        }
+        int score = (winner == getPlayerAt(AI_PLAYER)) ? 1 : -1;
+        // Multiply by color to make the score relative to the current caller
+        return score * color;
     }
 
     if (checkForDraw() || depth == 0) {
