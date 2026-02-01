@@ -328,7 +328,7 @@ void TicTacToe::updateAI()
                 _grid[y][x].setBit(tempBit);
                 
                 // Evaluate this move (next turn is opponent, so color = -1)
-                int score = negamax(_grid, MAX_DEPTH - 1, -1);
+                int score = -negamax(_grid, MAX_DEPTH - 1, -1);
                 
                 // Undo the move
                 _grid[y][x].destroyBit();
@@ -347,6 +347,7 @@ void TicTacToe::updateAI()
         Bit* bestMoveBit = PieceForPlayer(AI_PLAYER);
         bestMoveBit->setPosition(_grid[moveY][moveX].getPosition().x, _grid[moveY][moveX].getPosition().y);
         _grid[moveY][moveX].setBit(bestMoveBit);
+        std::cout << "AI places at (" << moveX << ", " << moveY << ") with score " << bestScore << "\n";
         endTurn();
     }
 }
