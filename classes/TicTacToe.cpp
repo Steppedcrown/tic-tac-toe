@@ -44,6 +44,7 @@
 const int AI_PLAYER    = 1;      // index of the AI player (O)
 const int HUMAN_PLAYER = 0;      // index of the human player (X)
 const int MAX_DEPTH    = 9;      // maximum search depth for negamax
+const int BIG_NUMBER   = 10000;  // a large number for alpha-beta pruning
 
 TicTacToe::TicTacToe()
 {
@@ -315,7 +316,7 @@ void TicTacToe::setStateString(const std::string &s)
 //
 void TicTacToe::updateAI()
 {
-    int bestScore = -1000;
+    int bestScore = -BIG_NUMBER;
     int moveX = -1;
     int moveY = -1;
     
@@ -328,7 +329,7 @@ void TicTacToe::updateAI()
                 _grid[y][x].setBit(tempBit);
                 
                 // Evaluate this move (next turn is opponent, so color = -1)
-                int score = -negamax(_grid, MAX_DEPTH - 1, -1);
+                int score = -negamax(_grid, MAX_DEPTH - 1, -BIG_NUMBER, BIG_NUMBER, -1);
                 
                 // Undo the move
                 _grid[y][x].destroyBit();
@@ -347,39 +348,39 @@ void TicTacToe::updateAI()
         Bit* bestMoveBit = PieceForPlayer(AI_PLAYER);
         bestMoveBit->setPosition(_grid[moveY][moveX].getPosition().x, _grid[moveY][moveX].getPosition().y);
         _grid[moveY][moveX].setBit(bestMoveBit);
-        std::cout << "AI places at (" << moveX << ", " << moveY << ") with score " << bestScore << "\n";
         endTurn();
     }
 }
 
-int TicTacToe::negamax(Square board[3][3], int depth, int color) 
+// In your updateAI() call:
+// int score = -negamax(_grid, MAX_DEPTH - 1, -10000, 10000, -1);
+
+int TicTacToe::negamax(Square board[3][3], int depth, int alpha, int beta, int color) 
 {
-    // Check for terminal states
+    // 1. Terminal State Check
     Player *winner = checkForWinner();
     if (winner != nullptr) {
-        int score = (winner == getPlayerAt(AI_PLAYER)) ? 1 : -1;
-        // Multiply by color to make the score relative to the current caller
+        int score = (winner == getPlayerAt(AI_PLAYER)) ? (10 + depth) : (-10 - depth);
         return score * color;
     }
 
     if (checkForDraw() || depth == 0) {
-        return 0; // Draw or max depth reached
+        return 0;
     }
     
-    // Determine which player is making this move
-    // color = 1 means AI's turn, anything else means human's turn
     int currentPlayer = (color == 1) ? AI_PLAYER : HUMAN_PLAYER;
-    int bestValue = -1000;
+    int bestValue = -BIG_NUMBER;
     
     for (int y = 0; y < 3; y++) {
         for (int x = 0; x < 3; x++) {
-            if (board[y][x].bit() == nullptr) { // empty square
+            if (board[y][x].bit() == nullptr) {
                 // Make the move
                 Bit* tempBit = PieceForPlayer(currentPlayer);
                 board[y][x].setBit(tempBit);
                 
-                // Recursively evaluate (negamax principle: negate opponent's score)
-                int score = -negamax(board, depth - 1, -color);
+                // Note: The parameters swap and negate for the opponent
+                // -beta becomes the new alpha, -alpha becomes the new beta
+                int score = -negamax(board, depth - 1, -beta, -alpha, -color);
                 
                 // Undo the move
                 board[y][x].destroyBit();
@@ -387,14 +388,18 @@ int TicTacToe::negamax(Square board[3][3], int depth, int color)
                 if (score > bestValue) {
                     bestValue = score;
                 }
+
+                // Update Alpha
+                if (bestValue > alpha) {
+                    alpha = bestValue;
+                }
+
+                // Alpha-Beta Cutoff
+                if (alpha >= beta) {
+                    return alpha; // Prune the rest of this branch
+                }
             }
         }
     }
-    
-    // If no moves were possible (shouldn't happen due to terminal checks)
-    if (bestValue == -1000) {
-        return 0;
-    }
     return bestValue;
 }
-
