@@ -7,11 +7,11 @@
 - Added a post-load game-over recheck so UI reflects completed games after loading.
 
 ## AI Implementation
-- Implemented a basic random AI that places pieces in empty squares.
+- Implemented negamax algorithm with alpha-beta pruning for optimal play.
 - Player 1 (O) is controlled by the AI, while Player 0 (X) is controlled by the human.
-- The AI scans the board for empty squares and randomly selects one to place its piece.
-- AI piece placement uses `actionForEmptyHolder()` for consistency with human move logic.
-- AI is enabled during board setup via `setAIPlayer(AI_PLAYER)`.
+- Evaluation scores wins as `+10 + depth` and losses as `-10 - depth` to prefer faster wins and delay losses.
+- The `color` parameter alternates between `1` (AI turn) and `-1` (opponent turn).
+- Maximum search depth is 9 (all possible moves are explored for perfect play).
 
 ## Platform
 - Development and testing were done on macOS.
