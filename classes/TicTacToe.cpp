@@ -41,8 +41,9 @@
 // The rest of the routines are written as “comment-first” TODOs for you to complete.
 // -----------------------------------------------------------------------------
 
-const int AI_PLAYER   = 1;      // index of the AI player (O)
-const int HUMAN_PLAYER= 0;      // index of the human player (X)
+const int AI_PLAYER    = 1;      // index of the AI player (O)
+const int HUMAN_PLAYER = 0;      // index of the human player (X)
+const int MAX_DEPTH    = 9;      // maximum search depth for negamax
 
 TicTacToe::TicTacToe()
 {
@@ -314,26 +315,88 @@ void TicTacToe::setStateString(const std::string &s)
 //
 void TicTacToe::updateAI() 
 {
-    // Find all empty squares
-    std::vector<BitHolder*> emptySquares;
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (_grid[i][j].bit() == nullptr) {
-                emptySquares.push_back(&_grid[i][j]);
+    int bestScore = -INFINITY;
+    int moveX = -1;
+    int moveY = -1;
+    
+    // Try each empty square and evaluate using negamax
+    for (int y = 0; y < 3; y++) {
+        for (int x = 0; x < 3; x++) {
+            if (_grid[y][x].bit() == nullptr) { // empty square
+                // Make the AI move
+                Bit* tempBit = PieceForPlayer(AI_PLAYER);
+                _grid[y][x].setBit(tempBit);
+                
+                // Evaluate this move (next turn is opponent, so color = -1)
+                int score = -negamax(_grid, MAX_DEPTH - 1, -1);
+                
+                // Undo the move
+                _grid[y][x].destroyBit();
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    moveX = x;
+                    moveY = y;
+                }
             }
         }
     }
     
-    // If there are empty squares, pick a random one and place the AI's piece
-    if (!emptySquares.empty()) {
-        int randomIndex = rand() % emptySquares.size();
-        BitHolder* targetSquare = emptySquares[randomIndex];
-        
-        // Use actionForEmptyHolder to place the piece
-        actionForEmptyHolder(targetSquare);
-        
-        // End the AI's turn
+    // Make the best move found
+    if (moveX != -1 && moveY != -1) {
+        Bit* bestMoveBit = PieceForPlayer(AI_PLAYER);
+        bestMoveBit->setPosition(_grid[moveY][moveX].getPosition().x, _grid[moveY][moveX].getPosition().y);
+        _grid[moveY][moveX].setBit(bestMoveBit);
         endTurn();
     }
+}
+
+int TicTacToe::negamax(Square board[3][3], int depth, int color) 
+{
+    // Check for terminal states
+    Player *winner = checkForWinner();
+    if (winner != nullptr) {
+        // If AI won, return positive; if human won, return negative
+        if (winner == getPlayerAt(AI_PLAYER)) {
+            return 10 - (MAX_DEPTH - depth);  // Prefer faster wins
+        } else {
+            return -10 + (MAX_DEPTH - depth); // Prefer slower losses
+        }
+    }
+    
+    if (checkForDraw() || depth == 0) {
+        return 0; // Draw or max depth reached
+    }
+    
+    // Determine which player is making this move
+    // color = 1 means AI's turn, anything else means human's turn
+    int currentPlayer = (color == 1) ? AI_PLAYER : HUMAN_PLAYER;
+    int bestValue = -INFINITY;
+    
+    for (int y = 0; y < 3; y++) {
+        for (int x = 0; x < 3; x++) {
+            if (board[y][x].bit() == nullptr) { // empty square
+                // Make the move
+                Bit* tempBit = PieceForPlayer(currentPlayer);
+                board[y][x].setBit(tempBit);
+                
+                // Recursively evaluate (negamax principle: negate opponent's score)
+                int score = -negamax(board, depth - 1, -color);
+                
+                // Undo the move
+                board[y][x].destroyBit();
+                
+                if (score > bestValue) {
+                    bestValue = score;
+                }
+            }
+        }
+    }
+    
+    // If no moves were possible (shouldn't happen due to terminal checks)
+    if (bestValue == -INFINITY) {
+        return 0;
+    }
+    return bestValue;
 }
 
